@@ -1,0 +1,17 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Sensitive data (optional, consider if stats should be committed)
+# data/stats.json
+
+# Configuration (contains token - strongly recommended to ignore)
+# config.py
+
+# IDE/Editor specific files
+.vscode/
+.idea/ 
