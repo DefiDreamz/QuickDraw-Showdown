@@ -5,6 +5,9 @@ from discord import app_commands
 from discord.ext import commands
 import math
 
+# Import the database getter function
+from cogs.settings import get_game_channel_db
+
 import config
 
 
@@ -39,15 +42,18 @@ class Tournament(commands.Cog):
     @app_commands.command(name="join_tournament", description="Join the next tournament")
     async def join_tournament(self, interaction: discord.Interaction):
         """Join the upcoming tournament in this server."""
-        # Check if in the designated game channel
-        if config.GAME_CHANNEL_ID and interaction.channel_id != config.GAME_CHANNEL_ID:
+        # NEW CHECK:
+        guild_id = interaction.guild_id
+        allowed_channel_id = await self.bot.loop.run_in_executor(
+            None, get_game_channel_db, guild_id
+        )
+        if allowed_channel_id is not None and interaction.channel_id != allowed_channel_id:
             await interaction.response.send_message(
-                f"This game can only be played in <#{config.GAME_CHANNEL_ID}>!",
+                f"This command can only be used in <#{allowed_channel_id}>!",
                 ephemeral=True
             )
             return
 
-        guild_id = interaction.guild_id
         user_id = interaction.user.id
         
         # Initialize guild in participants dict if not present
@@ -82,24 +88,19 @@ class Tournament(commands.Cog):
     @app_commands.default_permissions(administrator=True)
     async def start_tournament(self, interaction: discord.Interaction):
         """Start a tournament with all registered players."""
-        # Check if in the designated game channel
-        if config.GAME_CHANNEL_ID and interaction.channel_id != config.GAME_CHANNEL_ID:
+        # NEW CHECK:
+        guild_id = interaction.guild_id
+        allowed_channel_id = await self.bot.loop.run_in_executor(
+            None, get_game_channel_db, guild_id
+        )
+        if allowed_channel_id is not None and interaction.channel_id != allowed_channel_id:
             await interaction.response.send_message(
-                f"This game can only be played in <#{config.GAME_CHANNEL_ID}>!",
+                f"This command can only be used in <#{allowed_channel_id}>!",
                 ephemeral=True
             )
             return
 
-        guild_id = interaction.guild_id
-        
-        # Check if tournament is already active
-        if guild_id in self.active_tournaments:
-            await interaction.response.send_message(
-                "A tournament is already in progress!", 
-                ephemeral=True
-            )
-            return
-        
+        # guild_id already defined above
         # Check if enough participants
         if guild_id not in self.participants or len(self.participants[guild_id]) < 2:
             await interaction.response.send_message(

@@ -2,6 +2,7 @@ import discord
 import os
 import asyncio
 import logging
+import sqlite3
 from discord.ext import commands
 
 import config
@@ -9,6 +10,36 @@ import config
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
 logger = logging.getLogger('discord')
+
+# --- Database Setup ---
+DATABASE_FILE = 'data/settings.db'
+
+def initialize_database():
+    """Initializes the settings database and creates the settings table if it doesn't exist."""
+    try:
+        # Ensure data directory exists
+        os.makedirs(os.path.dirname(DATABASE_FILE), exist_ok=True)
+
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+
+        # Create table if it doesn't exist
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS guild_settings (
+                guild_id INTEGER PRIMARY KEY,
+                game_channel_id INTEGER DEFAULT NULL
+            )
+        ''')
+
+        conn.commit()
+        conn.close()
+        logger.info(f"Database initialized successfully at {DATABASE_FILE}")
+    except sqlite3.Error as e:
+        logger.error(f"Database initialization error: {e}", exc_info=True)
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during database initialization: {e}", exc_info=True)
+
+# --- End Database Setup ---
 
 # Define necessary intents
 intents = discord.Intents.default()
@@ -22,6 +53,9 @@ class QuickDrawBot(commands.Bot):
 
     async def setup_hook(self):
         """Loads cogs automatically when the bot starts."""
+        # Initialize database first
+        initialize_database()
+
         logger.info(f'Loading cogs...')
         cogs_loaded = 0
         for filename in os.listdir('./cogs'):

@@ -3,6 +3,9 @@ import json
 from discord import app_commands
 from discord.ext import commands
 
+# Import the database getter function
+from cogs.settings import get_game_channel_db
+
 import config
 
 
@@ -45,10 +48,14 @@ class Stats(commands.Cog):
     @app_commands.describe(player="The player whose stats you want to see (leave empty for your own stats)")
     async def stats_command(self, interaction: discord.Interaction, player: discord.Member = None):
         """Display duel statistics for yourself or another player."""
-        # Check if in the designated game channel
-        if config.GAME_CHANNEL_ID and interaction.channel_id != config.GAME_CHANNEL_ID:
+        # NEW CHECK:
+        guild_id = interaction.guild_id
+        allowed_channel_id = await self.bot.loop.run_in_executor(
+            None, get_game_channel_db, guild_id
+        )
+        if allowed_channel_id is not None and interaction.channel_id != allowed_channel_id:
             await interaction.response.send_message(
-                f"This game can only be played in <#{config.GAME_CHANNEL_ID}>!",
+                f"This command can only be used in <#{allowed_channel_id}>!",
                 ephemeral=True
             )
             return
@@ -98,10 +105,14 @@ class Stats(commands.Cog):
     @app_commands.command(name="leaderboard", description="Show the top duelists")
     async def leaderboard_command(self, interaction: discord.Interaction):
         """Display the top players ranked by wins."""
-        # Check if in the designated game channel
-        if config.GAME_CHANNEL_ID and interaction.channel_id != config.GAME_CHANNEL_ID:
+        # NEW CHECK:
+        guild_id = interaction.guild_id
+        allowed_channel_id = await self.bot.loop.run_in_executor(
+            None, get_game_channel_db, guild_id
+        )
+        if allowed_channel_id is not None and interaction.channel_id != allowed_channel_id:
             await interaction.response.send_message(
-                f"This game can only be played in <#{config.GAME_CHANNEL_ID}>!",
+                f"This command can only be used in <#{allowed_channel_id}>!",
                 ephemeral=True
             )
             return

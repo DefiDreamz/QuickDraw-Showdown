@@ -5,6 +5,9 @@ import asyncio
 from discord import app_commands
 from discord.ext import commands
 
+# Import the database getter function
+from cogs.settings import get_game_channel_db
+
 import config
 
 
@@ -61,10 +64,14 @@ class Duel(commands.Cog):
     @app_commands.describe(target="The player you want to challenge")
     async def duel_command(self, interaction: discord.Interaction, target: discord.Member):
         """Challenge another player to a QuickDraw duel."""
-        # Check if in the designated game channel
-        if config.GAME_CHANNEL_ID and interaction.channel_id != config.GAME_CHANNEL_ID:
+        # NEW CHECK:
+        guild_id = interaction.guild_id
+        allowed_channel_id = await self.bot.loop.run_in_executor(
+            None, get_game_channel_db, guild_id
+        )
+        if allowed_channel_id is not None and interaction.channel_id != allowed_channel_id:
             await interaction.response.send_message(
-                f"This game can only be played in <#{config.GAME_CHANNEL_ID}>!",
+                f"This command can only be used in <#{allowed_channel_id}>!",
                 ephemeral=True
             )
             return
@@ -102,10 +109,14 @@ class Duel(commands.Cog):
     @app_commands.command(name="accept", description="Accept a duel challenge")
     async def accept_command(self, interaction: discord.Interaction):
         """Accept a pending duel challenge."""
-        # Check if in the designated game channel
-        if config.GAME_CHANNEL_ID and interaction.channel_id != config.GAME_CHANNEL_ID:
+        # NEW CHECK:
+        guild_id = interaction.guild_id
+        allowed_channel_id = await self.bot.loop.run_in_executor(
+            None, get_game_channel_db, guild_id
+        )
+        if allowed_channel_id is not None and interaction.channel_id != allowed_channel_id:
             await interaction.response.send_message(
-                f"This game can only be played in <#{config.GAME_CHANNEL_ID}>!",
+                f"This command can only be used in <#{allowed_channel_id}>!",
                 ephemeral=True
             )
             return

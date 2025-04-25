@@ -6,6 +6,9 @@ __pycache__/
 *.pyc
 *.pyo
 
+# Database files
+data/*.db
+
 # Sensitive data (optional, consider if stats should be committed)
 # data/stats.json
 
