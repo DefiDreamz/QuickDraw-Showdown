@@ -4,12 +4,26 @@ import asyncio
 import logging
 import sqlite3
 from discord.ext import commands
-
+from aiohttp import web
 import config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(name)s: %(message)s')
 logger = logging.getLogger('discord')
+
+# --- Web Server Setup ---
+async def health_check(request):
+    return web.Response(text="Bot is running")
+
+async def run_web_server():
+    app = web.Application()
+    app.router.add_get('/', health_check)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get('PORT', 10000))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    logger.info(f"Web server started on port {port}")
 
 # --- Database Setup ---
 DATABASE_FILE = 'data/settings.db'
@@ -94,6 +108,10 @@ class QuickDrawBot(commands.Bot):
 async def main():
     """Initializes and runs the bot."""
     bot = QuickDrawBot()
+    
+    # Start web server
+    await run_web_server()
+    
     try:
         await bot.start(config.BOT_TOKEN)
     except discord.LoginFailure:
