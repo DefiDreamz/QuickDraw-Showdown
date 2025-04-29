@@ -1,0 +1,10 @@
+services:
+  - type: worker
+    name: quickdraw-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./start.sh
+    runtime: python3
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0 

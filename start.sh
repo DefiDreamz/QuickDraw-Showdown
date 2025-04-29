@@ -1,2 +1,2 @@
 #!/bin/bash
-python bot.py 
+python bot.py || exit 1 
