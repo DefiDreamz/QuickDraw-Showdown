@@ -2,7 +2,7 @@ import os
 
 # Discord Bot Token - Replace with your actual token
 # Make sure to set this via environment variable or other secure means
-BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN', None) # Read from env var DISCORD_BOT_TOKEN, default to None if not set
+BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 # Admin Role IDs or User IDs who can start tournaments
 ADMIN_IDS = [1087826581285769217] # User ID added

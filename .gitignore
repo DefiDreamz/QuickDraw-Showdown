@@ -1,13 +1,26 @@
-# Virtual environment
-.venv/
-
-# Python cache
+# Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# Database files
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
 data/*.db
+*.log
 
 # Sensitive data (optional, consider if stats should be committed)
 # data/stats.json
